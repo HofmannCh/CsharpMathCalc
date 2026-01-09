@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MathCalc.Hotkey\MathCalc.Hotkey.csproj" />
     <ProjectReference Include="..\MathCalc.Logic\MathCalc.Logic.csproj" />
-    <ProjectReference Include="..\MathCalc\MathCalc.csproj" />
   </ItemGroup>
 
 </Project>

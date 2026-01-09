@@ -28,11 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             label1 = new Label();
             expression_input = new TextBox();
             calculate_button = new Button();
             label2 = new Label();
             result_output = new Label();
+            label3 = new Label();
+            history_list = new ListBox();
             SuspendLayout();
             // 
             // label1
@@ -80,18 +83,39 @@
             result_output.Size = new Size(0, 15);
             result_output.TabIndex = 3;
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(10, 70);
+            label3.Name = "label3";
+            label3.Size = new Size(48, 15);
+            label3.TabIndex = 0;
+            label3.Text = "Historie";
+            // 
+            // history_list
+            // 
+            history_list.FormattingEnabled = true;
+            history_list.Location = new Point(150, 70);
+            history_list.Name = "history_list";
+            history_list.Size = new Size(550, 109);
+            history_list.TabIndex = 4;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 68);
+            ClientSize = new Size(800, 201);
+            Controls.Add(history_list);
             Controls.Add(result_output);
             Controls.Add(calculate_button);
             Controls.Add(expression_input);
+            Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
-            Text = "Form1";
+            Text = "MathCalc";
             KeyDown += Form1_KeyDown;
             ResumeLayout(false);
             PerformLayout();
@@ -104,5 +128,7 @@
         private Button calculate_button;
         private Label label2;
         private Label result_output;
+        private Label label3;
+        private ListBox history_list;
     }
 }
