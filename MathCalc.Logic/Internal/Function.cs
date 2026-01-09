@@ -1,44 +1,51 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 
 namespace MathCalc.Logic.Internal
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    internal class Function(string name, int countAttributes, Func<List<double>, double> action)
+    internal class Function(string name, CalcObjType[] attributes, Func<List<CalcObj>, CalcObj> action)
     {
         private static readonly Random Random = new Random();
 
         public static readonly Function[] Functions = [.. (new Function[]
         {
-            new ("sqrt", 1, attrs => Math.Sqrt(attrs[0])),
-            new ("pow", 2, attrs => Math.Pow(attrs[0], attrs[1])),
-            new ("pi", 0, attrs => Math.PI),
-            new ("log", 1, attrs => Math.Log(attrs[0])),
-            new ("log", 2, attrs => Math.Log(attrs[0], attrs[1])),
-            new ("log2", 1, attrs => Math.Log2(attrs[0])),
-            new ("log10", 1, attrs => Math.Log10(attrs[0])),
-            new ("min", 2, attrs => Math.Min(attrs[0], attrs[1])),
-            new ("max", 2, attrs => Math.Max(attrs[0], attrs[1])),
-            new ("floor", 1, attrs => Math.Floor(attrs[0])),
-            new ("roundd", 1, attrs => Math.Floor(attrs[0])),
-            new ("ceil", 1, attrs => Math.Ceiling(attrs[0])),
-            new ("roundu", 1, attrs => Math.Ceiling(attrs[0])),
-            new ("round", 1, attrs => Math.Round(attrs[0])),
-            new ("abs", 1, attrs => Math.Abs(attrs[0])),
-            new ("sin", 1, attrs => Math.Sin(attrs[0])),
-            new ("cos", 1, attrs => Math.Cos(attrs[0])),
-            new ("tan", 1, attrs => Math.Tan(attrs[0])),
-            new ("tan", 1, attrs => Math.Tan(attrs[0])),
-            new ("rnd", 0, attrs => Random.NextDouble()),
-            new ("rndi", 0, attrs => Random.Next()),
-            new ("rndi", 1, attrs => Random.Next((int)attrs[0])),
-            new ("rndi", 2, attrs => Random.Next((int)attrs[0], (int)attrs[1])),
+            new ("sqrt", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Sqrt(attrs[0].ToTypeDouble()))),
+            new ("pow", [CalcObjType.Number,CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Pow(attrs[0].ToTypeDouble(), attrs[1].ToTypeDouble()))),
+            new ("pi", [], attrs => new CalcObj(CalcObjType.Number, Math.PI)),
+            new ("log", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Log(attrs[0].ToTypeDouble()))),
+            new ("log", [CalcObjType.Number,CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Log(attrs[0].ToTypeDouble(), attrs[1].ToTypeDouble()))),
+            new ("log2", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Log2(attrs[0].ToTypeDouble()))),
+            new ("log10", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Log10(attrs[0].ToTypeDouble()))),
+            new ("min", [CalcObjType.Number,CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Min(attrs[0].ToTypeDouble(), attrs[1].ToTypeDouble()))),
+            new ("max", [CalcObjType.Number,CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Max(attrs[0].ToTypeDouble(), attrs[1].ToTypeDouble()))),
+            new ("floor", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Floor(attrs[0].ToTypeDouble()))),
+            new ("roundd", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Floor(attrs[0].ToTypeDouble()))),
+            new ("ceil", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Ceiling(attrs[0].ToTypeDouble()))),
+            new ("roundu", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Ceiling(attrs[0].ToTypeDouble()))),
+            new ("round", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Round(attrs[0].ToTypeDouble()))),
+            new ("abs", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Abs(attrs[0].ToTypeDouble()))),
+            new ("sin", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Sin(attrs[0].ToTypeDouble()))),
+            new ("cos", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Cos(attrs[0].ToTypeDouble()))),
+            new ("tan", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Math.Tan(attrs[0].ToTypeDouble()))),
+            new ("rnd", [], attrs => new CalcObj(CalcObjType.Number, Random.NextDouble())),
+            new ("rndi", [], attrs => new CalcObj(CalcObjType.Number, Random.Next())),
+            new ("rndi", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Random.Next(attrs[0].ToTypeInt()))),
+            new ("rndi", [CalcObjType.Number, CalcObjType.Number], attrs => new CalcObj(CalcObjType.Number, Random.Next(attrs[0].ToTypeInt(), attrs[1].ToTypeInt()))),
+            new ("guid", [], attrs => new CalcObj(CalcObjType.String, Guid.NewGuid().ToString())),
+            new ("guid", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.String, string.Join(Environment.NewLine, Enumerable.Range(0, attrs[0].ToTypeInt()).Select(x => Guid.NewGuid())))),
+            new ("guid", [CalcObjType.Number,CalcObjType.String], attrs => new CalcObj(CalcObjType.String, string.Join(attrs[1].ToTypeString(), Enumerable.Range(0, attrs[0].ToTypeInt()).Select(x => Guid.NewGuid())))),
+            new ("range", [CalcObjType.Number], attrs => new CalcObj(CalcObjType.String, string.Join(Environment.NewLine, Enumerable.Range(0, attrs[0].ToTypeInt()).Select((x,i) => i)))),
+            new ("range", [CalcObjType.Number, CalcObjType.String], attrs => new CalcObj(CalcObjType.String, string.Join(attrs[1].ToTypeString(), Enumerable.Range(0, attrs[0].ToTypeInt()).Select((x,i) => i)))),
+            new ("range", [CalcObjType.Number, CalcObjType.Number], attrs => new CalcObj(CalcObjType.String, string.Join(Environment.NewLine, Enumerable.Range(attrs[0].ToTypeInt(), attrs[1].ToTypeInt()).Select((x,i) => i+attrs[0].ToTypeInt())))),
+            new ("range", [CalcObjType.Number, CalcObjType.Number, CalcObjType.String], attrs => new CalcObj(CalcObjType.String, string.Join(attrs[2].ToTypeString(), Enumerable.Range(attrs[0].ToTypeInt(), attrs[1].ToTypeInt()).Select((x,i) => i+attrs[0].ToTypeInt())))),
         }).OrderByDescending(x => x.Name.Length)];
 
         public string Name { get; set; } = name;
-        public int CountAttributes { get; set; } = countAttributes;
-        public Func<List<double>, double> Action { get; set; } = action;
+        public CalcObjType[] Attributes { get; set; } = attributes;
+        public Func<List<CalcObj>, CalcObj> Action { get; set; } = action;
 
-        public string DebuggerDisplay => $"FN {name}({CountAttributes}x)";
+        public string DebuggerDisplay => $"FN {name}({string.Join(",", attributes)}x)";
         public override string ToString() => DebuggerDisplay;
     }
 }

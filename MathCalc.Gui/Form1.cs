@@ -74,7 +74,7 @@ namespace MathCalc.Gui
             string result;
             try
             {
-                result = Calculator.EvaluateExpression(expression_input.Text).ToString();
+                result = Calculator.EvaluateExpression(expression_input.Text).ToTypeString();
             }
             catch (Exception ex)
             {
@@ -196,45 +196,11 @@ namespace MathCalc.Gui
             }
             Calculate();
         }
-
-        private void calculate_button_TextChanged(object sender, EventArgs e)
+        
+        private void expression_input_TextChanged(object sender, EventArgs e)
         {
             history_list.SelectedIndex = -1;
             Calculate();
-        }
-
-        private static DateTime LatestCClick = DateTime.MinValue;
-        internal void HotkeyOpenFormC()
-        {
-            LatestCClick = DateTime.UtcNow;
-        }
-        internal void HotkeyOpenFormX()
-        {
-            if (Focused && expression_input.Focused)
-            {
-                if (!string.IsNullOrWhiteSpace(result_output.Text))
-                    Clipboard.SetText(result_output.Text, TextDataFormat.Text);
-                Hide();
-                SendToBack();
-            }
-            else if ((LatestCClick - DateTime.UtcNow).TotalMilliseconds < 200)
-            {
-                //var text = Win32.GetSelectedTextFromActiveWindow();
-                //Win32.CopyTextFromActiveWindow();
-                var txt = Clipboard.GetText();
-                expression_input.Text = txt;
-                Show();
-                BringToFront();
-            }
-        }
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            //if (e.Control && e.KeyCode == Keys.X)
-            //{
-            //    Clipboard.SetText(result_output.Text, TextDataFormat.Text);
-            //    Hide();
-            //}
         }
     }
 }

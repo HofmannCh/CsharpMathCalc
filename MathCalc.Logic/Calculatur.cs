@@ -1,6 +1,7 @@
 ﻿using MathCalc.Logic.Internal;
 using System;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace MathCalc.Logic
 {
@@ -16,7 +17,7 @@ namespace MathCalc.Logic
         // 1 + 1 * 2
         // (1 + 1) * 2
 
-        public double EvaluateExpression(string expression)
+        public CalcObj EvaluateExpression(string expression)
         {
             try
             {
@@ -52,35 +53,36 @@ namespace MathCalc.Logic
             FunctionArgs
         }
 
-        private double EvaluateExpression(ref int pos, string expression, EvalMod evalMod)
+        private CalcObj EvaluateExpression(ref int pos, string expression, EvalMod evalMod)
         {
             string buildingValue = string.Empty;
-            double? currentValue = null;
+            CalcObj? currentValue = null;
             var readingMod = ReadingMod.Value;
 
             void MakeBuildNumber()
             {
-                if (!double.TryParse("0" + buildingValue.Replace(',', '.').TrimEnd('.'), out double currentValue2))
+                buildingValue = buildingValue.Replace(',', '.');
+                if (!double.TryParse("0" + buildingValue.TrimEnd('.'), out double currentValueDouble))
                     throw new Exception("Invalid identifier: " + buildingValue);
 
-                currentValue = currentValue2;
+                currentValue = new CalcObj(CalcObjType.Number, currentValueDouble);
                 readingMod = ReadingMod.Operator;
                 buildingValue = string.Empty;
             }
 
-            var subExpressions = new List<(double Value, Operator? Operator)>(4); // Value, Operation
-            var argValues = new List<double>(4);
+            var subExpressions = new List<(CalcObj Value, Operator[] Operator)>(4); // Value, Operation
+            var argValues = new List<CalcObj>(4);
             var startPos = pos;
 
-            double CalcCurrentVal(int pos)
+            CalcObj CalcCurrentVal(int pos)
             {
-                if (!currentValue.HasValue)
+                if (currentValue == null)
                     throw new Exception("Invalid value: " + Sub(expression, startPos, pos));
 
                 if (subExpressions.Count == 0)
-                    return currentValue.Value;
+                    return currentValue;
 
-                subExpressions.Add((currentValue.Value, null));
+                subExpressions.Add((currentValue, []));
 
                 return CalcCurrentValIterations(subExpressions);
             }
@@ -148,14 +150,31 @@ namespace MathCalc.Logic
                                 MakeBuildNumber();
                                 pos--;
                             }
-                            else if (char.IsAsciiLetterLower(c))
-                            {
-                                buildingValue = string.Empty + c;
-                                readingMod = ReadingMod.FunctionName;
-                            }
                             else
                             {
-                                throw new Exception("Invalid syntax: " + Sub(expression, startPos, pos));
+                                ValueForm? vf = null;
+                                foreach (var x in ValueForm.ValueForms)
+                                    if (SubStringEq(x.StartStr, expression, ref pos))
+                                    {
+                                        vf = x;
+                                        break;
+                                    }
+
+                                if (vf != null)
+                                {
+                                    pos++;
+                                    currentValue = new CalcObj(vf.Type, vf.Parse(ReadTill(expression, vf.EndStr, vf.EscapeChar, ref pos)));
+                                    readingMod = ReadingMod.Operator;
+                                }
+                                else if (char.IsAsciiLetterLower(c))
+                                {
+                                    buildingValue = string.Empty + c;
+                                    readingMod = ReadingMod.FunctionName;
+                                }
+                                else
+                                {
+                                    throw new Exception("Invalid syntax: " + Sub(expression, startPos, pos));
+                                }
                             }
 
                             break;
@@ -172,18 +191,22 @@ namespace MathCalc.Logic
                                 return CalcCurrentVal(pos - 1);
                             }
 
-                            Operator? op = null;
-                            foreach (var x in Operator.Operators)
-                                if (SubStringEq(x.Expression, expression, ref pos))
+                            var valTuple = new ValueTuple<int>(pos);
+                            var ops = Operator.Operators
+                                .Where(x =>
                                 {
-                                    op = x;
-                                    break;
-                                }
+                                    int pos2 = valTuple.Item1;
+                                    var same = x.First == currentValue!.Type && SubStringEq(x.Expression, expression, ref pos2);
+                                    valTuple.Item1 = pos2;
+                                    return same;
+                                })
+                                .ToArray();
+                            pos = valTuple.Item1;
 
-                            if (op == null)
+                            if (!ops.Any())
                                 throw new Exception("Invalid operator: " + Sub(expression, pos, pos + 1));
 
-                            subExpressions.Add((currentValue!.Value, op));
+                            subExpressions.Add((currentValue!, ops));
 
                             currentValue = null;
                             readingMod = ReadingMod.Value;
@@ -228,17 +251,16 @@ namespace MathCalc.Logic
                             {
                                 Function? fn = null;
                                 foreach (var x in Function.Functions)
-                                    if (StringComparer.OrdinalIgnoreCase.Equals(x.Name, buildingValue) && x.CountAttributes == argValues.Count)
+                                    if (StringComparer.OrdinalIgnoreCase.Equals(x.Name, buildingValue) && x.Attributes.SameValue(argValues, (a, b) => a == b.Type))
                                     {
-                                        //pos += x.Name.Length;
                                         fn = x;
                                         break;
                                     }
 
                                 if (fn == null)
-                                    throw new Exception($"Function not found with count arguments: {buildingValue} ({argValues.Count}x)");
+                                    throw new Exception($"Function not found with type arguments: {buildingValue} ({string.Join(", ", argValues)}");
 
-                                currentValue = fn?.Action.Invoke(argValues);
+                                currentValue = fn?.Action.Invoke(argValues!);
                                 buildingValue = string.Empty;
                                 readingMod = ReadingMod.Operator;
                             }
@@ -258,6 +280,30 @@ namespace MathCalc.Logic
                 MakeBuildNumber();
 
             return CalcCurrentVal(pos);
+        }
+
+
+        private string ReadTill(string expression, string endStr, char escapeChar, ref int pos)
+        {
+            var valueStr = string.Empty;
+            var isNextEscaped = false;
+            var chars = new StringBuilder(8);
+            
+            for (; pos < expression.Length; pos++)
+            {
+                var c = expression[pos];
+                if (!isNextEscaped && c == escapeChar)
+                    isNextEscaped = true;
+                else if (!isNextEscaped && SubStringEq(endStr, expression, ref pos))
+                    return chars.ToString();
+                else
+                {
+                    isNextEscaped = false;
+                    chars.Append(c);
+                }
+            }
+
+            throw new Exception("Invalid format value: " + chars.ToString());
         }
 
         private void AssureLower(ref char c)
@@ -292,10 +338,9 @@ namespace MathCalc.Logic
             return src.Substring(startPos, endPos - startPos);
         }
 
-        private double CalcCurrentValIterations(List<(double Value, Operator? Operator)> subExpressions)
+        private CalcObj CalcCurrentValIterations(List<(CalcObj Value, Operator[] Operator)> subExpressions)
         {
-
-            IEnumerable<(double Value, Operator Operator)> Iter(IEnumerable<(double Value, Operator? Operator)> items, int prio)
+            IEnumerable<(CalcObj Value, Operator[] Operator)> Iter(IEnumerable<(CalcObj Value, Operator[] Operator)> items, int prio)
             {
                 var enumerator = items.GetEnumerator();
                 enumerator.MoveNext(); // Always true, because check in subExpressions.Count == 0
@@ -306,21 +351,26 @@ namespace MathCalc.Logic
                 {
                     var currentItem = enumerator.Current;
 
-                    if (prevItem.Operator!.Prio < prio)
+                    var op = prevItem.Operator.FirstOrDefault(x => x.Second == currentItem.Value.Type);
+
+                    if (op == null)
+                        throw new Exception($"Invalid operator. No operator for {prevItem.Value} and {currentItem.Value}");
+
+                    if (op.Prio < prio)
                     {
                         yield return prevItem!;
                         prevItem = currentItem;
                     }
                     else
                     {
-                        prevItem = (prevItem.Operator.Action.Invoke(prevItem.Value, currentItem.Value), currentItem.Operator);
+                        prevItem = (op.Action.Invoke(prevItem.Value, currentItem.Value), currentItem.Operator);
                     }
                 }
 
                 yield return prevItem!;
             }
 
-            IEnumerable<(double Value, Operator? Operator)> iter = subExpressions;
+            IEnumerable<(CalcObj Value, Operator[] Operator)> iter = subExpressions;
             var maxPrio = Operator.Operators.Max(x => x.Prio);
             var minPrio = Operator.Operators.Min(x => x.Prio) - 1;
             for (int i = maxPrio; i >= minPrio; i--)

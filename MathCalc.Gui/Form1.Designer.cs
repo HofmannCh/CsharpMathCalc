@@ -53,7 +53,7 @@
             expression_input.Name = "expression_input";
             expression_input.Size = new Size(550, 23);
             expression_input.TabIndex = 1;
-            expression_input.TextChanged += calculate_button_TextChanged;
+            expression_input.TextChanged += expression_input_TextChanged;
             expression_input.KeyDown += calculate_button_KeyDown;
             // 
             // calculate_button
@@ -116,7 +116,6 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             Text = "MathCalc";
-            KeyDown += Form1_KeyDown;
             ResumeLayout(false);
             PerformLayout();
         }
