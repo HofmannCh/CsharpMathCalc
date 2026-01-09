@@ -1,34 +1,66 @@
-using GlobalHotkeysRX;
+//using GlobalHotkeysRX;
 using MathCalc.Logic;
+using WK.Libraries.HotkeyListenerNS;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MathCalc.Gui
 {
     public partial class Form1 : Form
     {
         private Calculatur Calculator = new Calculatur();
-        private GlobalHotkeys AppHotkeys;
+        //private GlobalHotkeys AppHotkeys;
+        internal HotkeyListener hotkeyListener = new HotkeyListener();
         public Form1()
         {
             InitializeComponent();
 
-            AppHotkeys = new GlobalHotkeys(Handle,
-                  //new Hotkey(Modifier.Control, VKey.C, HotkeyOpenFormC),
-                  new Hotkey(Modifier.Control, VKey.X, HotkeyOpenFormX)
-                );
+            //AppHotkeys = new GlobalHotkeys(Handle,
+            //      //new Hotkey(Modifier.Control, VKey.C, HotkeyOpenFormC),
+            //      new Hotkey(Modifier.Control, VKey.X, HotkeyOpenFormX)
+            //    );
+            InitHotkey();
 
             Load += (_, _) => expression_input.Focus();
+
+
         }
 
-        protected override void WndProc(ref Message m)
+        private void InitHotkey()
         {
-            if (m.Msg == WinApi.WM_HOTKEY)
-                AppHotkeys.OnWinFormMesssage(m);  // Replace by your own instance name
+            var clippingHotkey = new Hotkey(Keys.Control, Keys.X);
+            hotkeyListener.Add(clippingHotkey);
 
-            // (Optional) Stops any default or additional processing of the message.
-            m.Result = (IntPtr)0;
+            // Suspend listening to hotkeys when the Form is active.
+            hotkeyListener.SuspendOn(this);
 
-            base.WndProc(ref m);
+            // This event is used to listen to any hotkey presses.
+            hotkeyListener.HotkeyPressed += (object sender, HotkeyEventArgs e) =>
+            {
+                if (e.Hotkey != clippingHotkey)
+                    return;
+
+                expression_input.Text = e.SourceApplication.Selection;
+                //Show();
+                //BringToFront();
+            };
+
+            // This event is used to listen to any updated hotkeys.
+            hotkeyListener.HotkeyUpdated += (object sender, HotkeyListener.HotkeyUpdatedEventArgs e) =>
+            {
+                // OK
+            };
         }
+
+        //protected override void WndProc(ref Message m)
+        //{
+        //    if (m.Msg == WinApi.WM_HOTKEY)
+        //        AppHotkeys.OnWinFormMesssage(m);  // Replace by your own instance name
+
+        //    // (Optional) Stops any default or additional processing of the message.
+        //    m.Result = (IntPtr)0;
+
+        //    base.WndProc(ref m);
+        //}
 
         private void Calculate()
         {
@@ -76,7 +108,7 @@ namespace MathCalc.Gui
                 Hide();
                 SendToBack();
             }
-            else if((LatestCClick - DateTime.UtcNow).TotalMilliseconds < 200)
+            else if ((LatestCClick - DateTime.UtcNow).TotalMilliseconds < 200)
             {
                 //var text = Win32.GetSelectedTextFromActiveWindow();
                 //Win32.CopyTextFromActiveWindow();
