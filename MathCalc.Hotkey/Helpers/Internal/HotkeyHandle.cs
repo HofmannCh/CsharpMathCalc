@@ -30,8 +30,6 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         /// </summary>
         public HotkeyHandle()
         {
-            //Name = "75419812-025D-456B-9B44-36705CB07595";
-
             SuspendLayout();
             Visible = false;
 

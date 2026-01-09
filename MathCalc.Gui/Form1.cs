@@ -1,5 +1,6 @@
 //using GlobalHotkeysRX;
 using MathCalc.Logic;
+using System.Diagnostics;
 using WK.Libraries.HotkeyListenerNS;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -39,9 +40,12 @@ namespace MathCalc.Gui
                 if (e.Hotkey != clippingHotkey)
                     return;
 
-                expression_input.Text = e.SourceApplication.Selection;
-                Show();
-                BringToFront();
+                var txt = e.SourceApplication.Selection;
+                Debug.WriteLine("Hotkey pressed with selection:" + txt);
+
+                expression_input.Text = txt;
+                
+                Activate();
             };
 
             // This event is used to listen to any updated hotkeys.

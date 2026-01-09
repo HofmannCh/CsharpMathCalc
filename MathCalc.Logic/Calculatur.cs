@@ -77,8 +77,15 @@ namespace MathCalc.Logic
 
         public double EvaluateExpression(string expression)
         {
-            int pos = 0;
-            return EvaluateExpression(ref pos, expression, EvalMod.Root);
+            try
+            {
+                int pos = 0;
+                return EvaluateExpression(ref pos, expression, EvalMod.Root);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Calculate Exception: " + ex.Message);
+            }
         }
 
         // 4 + 2 * (3 + 1) / 4 = 3
@@ -112,7 +119,10 @@ namespace MathCalc.Logic
 
             void MakeBuildNumber()
             {
-                currentValue = Convert.ToDouble("0" + buildingValue.Replace(',', '.').TrimEnd('.'));
+                if (!double.TryParse("0" + buildingValue.Replace(',', '.').TrimEnd('.'), out double currentValue2))
+                    throw new Exception("Invalid identifier: " + buildingValue);
+
+                currentValue = currentValue2;
                 readingMod = ReadingMod.Operator;
                 buildingValue = string.Empty;
             }
@@ -228,6 +238,10 @@ namespace MathCalc.Logic
                                 pos++;
                                 return CalcCurrentVal(pos - 1);
                             }
+                            else if (c == '_' || c == '\'')
+                            {
+                                // continue;
+                            }
                             else if (char.IsAsciiDigit(c) || c == '.' || c == ',')
                             {
                                 buildingValue += c;
@@ -299,12 +313,12 @@ namespace MathCalc.Logic
 
                     case ReadingMod.FunctionArgs:
                         {
-                            if(c == ')')
+                            if (c == ')')
                                 goto case ReadingMod.FunctionArgsComma;
 
                             argValues.Add(EvaluateExpression(ref pos, expression, EvalMod.FunctionArgs));
                             readingMod = ReadingMod.FunctionArgsComma;
-                            pos-=2;
+                            pos -= 2;
                             break;
                         }
                     case ReadingMod.FunctionArgsComma:
