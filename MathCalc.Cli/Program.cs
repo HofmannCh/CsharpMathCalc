@@ -1,4 +1,6 @@
-﻿namespace MathCalc
+﻿using MathCalc.Logic;
+
+namespace MathCalc
 {
     internal class Program
     {

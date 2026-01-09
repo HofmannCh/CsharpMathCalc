@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="MathCalc/MathCalc.csproj" />
+  <Project Path="MathCalc.Gui/MathCalc.Gui.csproj" Id="d9ba5d3d-91c9-46b4-8ea1-a1235cd6ed60" />
+  <Project Path="MathCalc.Hotkey/MathCalc.Hotkey.csproj" Id="afb8a540-e409-41d5-8cd8-ef03c26bc187" />
+  <Project Path="MathCalc.Logic/MathCalc.Logic.csproj" Id="4372e453-38b0-43b6-b28b-f61f729eb88f" />
+  <Project Path="MathCalc.Cli/MathCalc.Cli.csproj" />
 </Solution>

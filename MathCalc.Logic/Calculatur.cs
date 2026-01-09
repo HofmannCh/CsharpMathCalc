@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace MathCalc
+namespace MathCalc.Logic
 {
     public class Calculatur
     {
