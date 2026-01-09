@@ -27,7 +27,7 @@ namespace MathCalc.Gui
 
         private void InitHotkey()
         {
-            var clippingHotkey = new Hotkey(Keys.Control, Keys.X);
+            var clippingHotkey = new Hotkey(Keys.Control, Keys.Y);
             hotkeyListener.Add(clippingHotkey);
 
             // Suspend listening to hotkeys when the Form is active.
@@ -40,8 +40,8 @@ namespace MathCalc.Gui
                     return;
 
                 expression_input.Text = e.SourceApplication.Selection;
-                //Show();
-                //BringToFront();
+                Show();
+                BringToFront();
             };
 
             // This event is used to listen to any updated hotkeys.

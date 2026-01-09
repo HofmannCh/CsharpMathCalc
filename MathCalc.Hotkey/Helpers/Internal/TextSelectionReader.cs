@@ -12,6 +12,7 @@
 
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace WK.Libraries.HotkeyListenerNS.Helpers
 {
@@ -53,7 +54,7 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         {
             _selectionMethods = new Func<string>[] {
                 () => this.GetTextFromWin32Api(),
-                //() => this.GetTextViaClipboard(),
+                () => this.GetTextViaClipboard(),
             };
         }
 
@@ -138,6 +139,8 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         {
             try
             {
+                Console.WriteLine(new StackTrace());
+
                 // Backup clipboard text.
                 string clipboardText = Clipboard.GetText();
 

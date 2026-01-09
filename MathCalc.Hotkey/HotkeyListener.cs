@@ -660,26 +660,20 @@ namespace WK.Libraries.HotkeyListenerNS
         {
             _handle.HotkeyPressed += (s, e) =>
             {
+                var srcApp = new SourceApplication(
+                        SourceAttributes.GetID(),
+                        SourceAttributes.GetHandle(),
+                        SourceAttributes.GetName(),
+                        SourceAttributes.GetTitle(),
+                        SourceAttributes.GetPath(),
+                        SourceAttributes.GetSelection());
+
                 HotkeyPressed?.Invoke(
-                    new SourceApplication(
-                            SourceAttributes.GetID(),
-                            SourceAttributes.GetHandle(),
-                            SourceAttributes.GetName(),
-                            SourceAttributes.GetTitle(),
-                            SourceAttributes.GetPath(),
-                            SourceAttributes.GetSelection()
-                    ),
+                    srcApp,
                     new HotkeyEventArgs
                     {
                         Hotkey = e.Hotkey,
-                        SourceApplication = new SourceApplication(
-                            SourceAttributes.GetID(),
-                            SourceAttributes.GetHandle(),
-                            SourceAttributes.GetName(),
-                            SourceAttributes.GetTitle(),
-                            SourceAttributes.GetPath(),
-                            SourceAttributes.GetSelection()
-                        )
+                        SourceApplication = srcApp
                     });
             };
         }

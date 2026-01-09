@@ -30,6 +30,8 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         /// </summary>
         public HotkeyHandle()
         {
+            //Name = "75419812-025D-456B-9B44-36705CB07595";
+
             SuspendLayout();
             Visible = false;
 
@@ -61,7 +63,7 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
             {
                 base.CreateControl();
             }
-        
+
             return this.Register(hotkey);
         }
 
@@ -85,7 +87,7 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         #endregion
 
         #region Private
-    
+
         /// <summary>
         /// Validates and registers any given Hotkey.
         /// </summary>
@@ -166,24 +168,20 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
         {
             if (m.Msg == WM_HOTKEY)
             {
-                HotkeyPressed?.Invoke(
-                    new SourceApplication(
+                var srcApp = new SourceApplication(
                         SourceAttributes.GetID(),
                         SourceAttributes.GetHandle(),
                         SourceAttributes.GetName(),
                         SourceAttributes.GetTitle(),
                         SourceAttributes.GetPath(),
-                        SourceAttributes.GetSelection()),
+                        SourceAttributes.GetSelection());
+
+                HotkeyPressed?.Invoke(
+                    srcApp,
                     new HotkeyEventArgs
                     {
                         Hotkey = HotkeyListener.Convert(this.Hotkeys[m.WParam.ToInt32()]),
-                        SourceApplication = new SourceApplication(
-                            SourceAttributes.GetID(),
-                            SourceAttributes.GetHandle(),
-                            SourceAttributes.GetName(),
-                            SourceAttributes.GetTitle(),
-                            SourceAttributes.GetPath(),
-                            SourceAttributes.GetSelection())
+                        SourceApplication = srcApp
                     });
             }
             else

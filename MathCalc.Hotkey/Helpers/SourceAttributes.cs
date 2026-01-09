@@ -113,10 +113,12 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
             try
             {
                 string app = GetName().ToLower();
-                string selection = _reader.TryGetSelectedTextFromActiveControl();
+                string selection;
 
-                if (app == "chrome.exe" || app == "firefox.exe")
+                if (app == "chrome.exe" || app == "firefox.exe" || app == "brave.exe")
                     selection = _reader.GetTextViaClipboard();
+                else
+                    selection = _reader.TryGetSelectedTextFromActiveControl();
 
                 if (!string.IsNullOrWhiteSpace(selection))
                     return selection;

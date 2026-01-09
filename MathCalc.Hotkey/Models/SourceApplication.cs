@@ -11,6 +11,7 @@
 
 
 using System.Diagnostics;
+using WK.Libraries.HotkeyListenerNS.Helpers;
 
 namespace WK.Libraries.HotkeyListenerNS.Models
 {
@@ -70,7 +71,7 @@ namespace WK.Libraries.HotkeyListenerNS.Models
         /// Gets the application's absolute path.
         /// </summary>
         public string Path { get; }
-        
+
         /// <summary>
         /// Gets the currently selected text in the application.
         /// </summary>
