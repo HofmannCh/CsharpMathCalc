@@ -10,7 +10,7 @@ namespace MathCalc.Gui
     {
         private Calculatur Calculator = new Calculatur();
         //private GlobalHotkeys AppHotkeys;
-        internal HotkeyListener hotkeyListener = new HotkeyListener();
+        //internal HotkeyListener hotkeyListener = new HotkeyListener();
         public Form1()
         {
             InitializeComponent();
@@ -22,40 +22,53 @@ namespace MathCalc.Gui
             //      //new Hotkey(Modifier.Control, VKey.C, HotkeyOpenFormC),
             //      new Hotkey(Modifier.Control, VKey.X, HotkeyOpenFormX)
             //    );
-            InitHotkey();
 
-            Load += (_, _) => expression_input.Focus();
+            //var hks = new HotkeySelector();
+            //hks.Enable(expression_input);
 
+            //InitHotkey();
 
+            FormClosing += (s, e) =>
+            {
+                e.Cancel = true;
+                Hide();
+            };
         }
 
-        private void InitHotkey()
+        //private void InitHotkey()
+        //{
+        //    var clippingHotkey = new Hotkey(Keys.Control, Keys.Oem102 /* Hotkey "<>/" (key between left shift and Y) */);
+        //    hotkeyListener.Add(clippingHotkey);
+
+        //    // Suspend listening to hotkeys when the Form is active.
+        //    hotkeyListener.SuspendOn(this);
+
+        //    // This event is used to listen to any hotkey presses.
+        //    hotkeyListener.HotkeyPressed += (object sender, HotkeyEventArgs e) =>
+        //    {
+        //        if (e.Hotkey != clippingHotkey)
+        //            return;
+
+        //        var txt = e.SourceApplication.Selection;
+        //        Debug.WriteLine("Hotkey pressed with selection:" + txt);
+        //    };
+
+        //    // This event is used to listen to any updated hotkeys.
+        //    //hotkeyListener.HotkeyUpdated += (object sender, HotkeyListener.HotkeyUpdatedEventArgs e) =>
+        //    //{
+        //    //    // OK
+        //    //};
+        //}
+
+        public void OpenForm(string expression)
         {
-            var clippingHotkey = new Hotkey(Keys.Control, Keys.Y);
-            hotkeyListener.Add(clippingHotkey);
+            expression_input.Text = expression;
 
-            // Suspend listening to hotkeys when the Form is active.
-            hotkeyListener.SuspendOn(this);
+            if (WindowState == FormWindowState.Minimized)
+                WindowState = FormWindowState.Normal;
 
-            // This event is used to listen to any hotkey presses.
-            hotkeyListener.HotkeyPressed += (object sender, HotkeyEventArgs e) =>
-            {
-                if (e.Hotkey != clippingHotkey)
-                    return;
-
-                var txt = e.SourceApplication.Selection;
-                Debug.WriteLine("Hotkey pressed with selection:" + txt);
-
-                expression_input.Text = txt;
-
-                Activate();
-            };
-
-            // This event is used to listen to any updated hotkeys.
-            //hotkeyListener.HotkeyUpdated += (object sender, HotkeyListener.HotkeyUpdatedEventArgs e) =>
-            //{
-            //    // OK
-            //};
+            Activate();
+            BringToFront();
         }
 
         //protected override void WndProc(ref Message m)
@@ -103,9 +116,11 @@ namespace MathCalc.Gui
                     Calculate();
                 }
             }
-            else if (e.Control && e.KeyCode == Keys.Y)
+            else if (e.Control && e.KeyCode == Keys.Oem102)
             {
-                Clipboard.SetText(result_output.Text);
+                if (!string.IsNullOrWhiteSpace(expression_input.Text))
+                    Clipboard.SetText(result_output.Text);
+                //WindowState = FormWindowState.Minimized;
                 Hide();
             }
             else if (e.KeyCode == Keys.Delete && history_list.SelectedIndex >= 0)
@@ -133,7 +148,7 @@ namespace MathCalc.Gui
                     if (history_list.Items.Count > history_list.SelectedIndex + 1)
                         history_list.SelectedIndex++;
                 }
-                else if(!string.IsNullOrWhiteSpace(expression_input.Text))
+                else if (!string.IsNullOrWhiteSpace(expression_input.Text))
                 {
                     var isEqual = false;
                     if (history_list.Items.Count >= 1)
@@ -196,7 +211,7 @@ namespace MathCalc.Gui
             }
             Calculate();
         }
-        
+
         private void expression_input_TextChanged(object sender, EventArgs e)
         {
             history_list.SelectedIndex = -1;

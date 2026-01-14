@@ -86,7 +86,7 @@ namespace WK.Libraries.HotkeyListenerNS.Helpers
                 {
                     var result = action.Invoke();
                     
-                    if (result != null)
+                    if (!string.IsNullOrEmpty(result))
                         return result;
                 }
             }
