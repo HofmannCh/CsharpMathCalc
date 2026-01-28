@@ -137,7 +137,7 @@ namespace MathCalc.Logic
                                 pos++;
                                 return CalcCurrentVal(pos - 1);
                             }
-                            else if (c == '_' || c == '\'')
+                            else if (c == '_' || c == '\'' || c == '’')
                             {
                                 // continue;
                             }
