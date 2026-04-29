@@ -29,9 +29,11 @@ namespace MathCalc.Gui
 
         }
 
+        public static Keys HotKey = Keys.Y;
+
         private void InitHotkey()
         {
-            var clippingHotkey = new Hotkey(Keys.Control, Keys.Y);
+            var clippingHotkey = new Hotkey(Keys.Control, HotKey);
             hotkeyListener.Add(clippingHotkey);
 
             // Suspend listening to hotkeys when the Form is active.
@@ -103,9 +105,10 @@ namespace MathCalc.Gui
                     Calculate();
                 }
             }
-            else if (e.Control && e.KeyCode == Keys.Y)
+            else if (e.Control && e.KeyCode == HotKey || e.KeyCode == Keys.Escape)
             {
-                Clipboard.SetText(result_output.Text);
+                if (!string.IsNullOrWhiteSpace(result_output?.Text))
+                    Clipboard.SetText(result_output.Text);
                 Hide();
             }
             else if (e.KeyCode == Keys.Delete && history_list.SelectedIndex >= 0)
@@ -133,7 +136,7 @@ namespace MathCalc.Gui
                     if (history_list.Items.Count > history_list.SelectedIndex + 1)
                         history_list.SelectedIndex++;
                 }
-                else if(!string.IsNullOrWhiteSpace(expression_input.Text))
+                else if (!string.IsNullOrWhiteSpace(expression_input.Text))
                 {
                     var isEqual = false;
                     if (history_list.Items.Count >= 1)
@@ -196,7 +199,7 @@ namespace MathCalc.Gui
             }
             Calculate();
         }
-        
+
         private void expression_input_TextChanged(object sender, EventArgs e)
         {
             history_list.SelectedIndex = -1;
